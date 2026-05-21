@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Iris Classifier</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg-color: #fdfbf7;
+                --card-bg: #ffffff;
+                --card-border: #e6e2da;
+                --text-main: #2d2d2d;
+                --text-muted: #6b6a68;
+                --accent-orange: #d96941;
+                --accent-green: #2b5a4b;
+                --accent-green-hover: #1f4d3c;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    sans-serif;
+            }
+
+            body {
+                background-color: var(--bg-color);
+                color: var(--text-main);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+                line-height: 1.5;
+            }
+
+            .layout-wrapper {
+                display: flex;
+                gap: 2rem;
+                max-width: 1300px;
+                width: 100%;
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                padding: 2.5rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                /* Square base */
+                border-radius: 0;
+                flex-wrap: wrap;
+            }
+
+            .left-col {
+                flex: 0.7;
+                min-width: 300px;
+            }
+
+            .right-col {
+                flex: 1.3;
+                min-width: 400px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                border-left: 1px solid var(--card-border);
+                padding-left: 2rem;
+            }
+
+            @media (max-width: 768px) {
+                .right-col {
+                    border-left: none;
+                    border-top: 1px solid var(--card-border);
+                    padding-left: 0;
+                    padding-top: 2rem;
+                }
+            }
+
+            h1 {
+                font-size: 2rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: var(--accent-green);
+            }
+
+            p.subtitle {
+                color: var(--text-muted);
+                margin-bottom: 2rem;
+                font-size: 0.95rem;
+            }
+
+            .input-group {
+                margin-bottom: 1.2rem;
+            }
+
+            .input-group label {
+                display: block;
+                margin-bottom: 0.4rem;
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: var(--text-main);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .input-group input {
+                width: 100%;
+                padding: 0.75rem;
+                background: #fafafa;
+                border: 1px solid var(--card-border);
+                border-radius: 0; /* Square base */
+                color: var(--text-main);
+                font-size: 1rem;
+                transition: border-color 0.2s;
+                outline: none;
+            }
+
+            .input-group input:focus {
+                border-color: var(--accent-orange);
+                background: #ffffff;
+            }
+
+            button {
+                width: 100%;
+                padding: 0.85rem;
+                background: var(--accent-green);
+                color: white;
+                border: none;
+                border-radius: 0; /* Square base */
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background 0.2s;
+                margin-top: 1rem;
+            }
+
+            button:hover {
+                background: var(--accent-green-hover);
+            }
+
+            .reference-img {
+                max-width: 100%;
+                height: auto;
+                border: 1px solid var(--card-border);
+                padding: 0.5rem;
+                background: #fafafa;
+            }
+
+            .reference-caption {
+                margin-top: 1rem;
+                font-size: 0.85rem;
+                color: var(--text-muted);
+                text-align: center;
+            }
+
+            /* Result Section */
+            #result-container {
+                margin-top: 2rem;
+                padding-top: 1.5rem;
+                border-top: 1px dashed var(--card-border);
+                display: none;
+            }
+
+            .prediction-flower {
+                font-size: 1.8rem;
+                font-weight: 600;
+                color: var(--accent-orange);
+                margin-bottom: 1rem;
+                text-transform: capitalize;
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .stat-card {
+                background: #fafafa;
+                padding: 1rem;
+                border: 1px solid var(--card-border);
+                border-radius: 0; /* Square */
+            }
+
+            .stat-card .label {
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 0.2rem;
+            }
+
+            .stat-card .value {
+                font-size: 1.2rem;
+                font-weight: 500;
+                color: var(--text-main);
+            }
+
+            .prob-row {
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .prob-label {
+                width: 90px;
+                text-transform: capitalize;
+                color: var(--text-muted);
+            }
+
+            .prob-bar-container {
+                flex-grow: 1;
+                height: 6px;
+                background: var(--card-border);
+                margin: 0 10px;
+            }
+
+            .prob-bar {
+                height: 100%;
+                background: var(--accent-orange);
+                width: 0%;
+                transition: width 0.8s ease-out;
+            }
+
+            .prob-value {
+                width: 45px;
+                text-align: right;
+                font-weight: 500;
+            }
+
+            .grid-2 {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="layout-wrapper">
+            <div class="left-col">
+                <h1>Iris Classifier</h1>
+                <p class="subtitle">Enter the botanical measurements below.</p>
+
+                <form id="predict-form">
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label for="sepal_length">Sepal Length</label>
+                            <input
+                                type="number"
+                                id="sepal_length"
+                                step="0.1"
+                                min="4.3"
+                                max="7.9"
+                                placeholder="4.3 - 7.9"
+                                required
+                            />
+                        </div>
+                        <div class="input-group">
+                            <label for="sepal_width">Sepal Width</label>
+                            <input
+                                type="number"
+                                id="sepal_width"
+                                step="0.1"
+                                min="2.0"
+                                max="4.4"
+                                placeholder="2.0 - 4.4"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label for="petal_length">Petal Length</label>
+                            <input
+                                type="number"
+                                id="petal_length"
+                                step="0.1"
+                                min="1.0"
+                                max="6.9"
+                                placeholder="1.0 - 6.9"
+                                required
+                            />
+                        </div>
+                        <div class="input-group">
+                            <label for="petal_width">Petal Width</label>
+                            <input
+                                type="number"
+                                id="petal_width"
+                                step="0.1"
+                                min="0.1"
+                                max="2.5"
+                                placeholder="0.1 - 2.5"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submit-btn">
+                        Predict Species
+                    </button>
+                </form>
+
+                <div id="result-container">
+                    <div
+                        style="
+                            font-size: 0.85rem;
+                            color: var(--text-muted);
+                            text-transform: uppercase;
+                            margin-bottom: 0.2rem;
+                        "
+                    >
+                        Predicted Species
+                    </div>
+                    <div class="prediction-flower" id="pred-flower">Setosa</div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="label">Confidence</div>
+                            <div class="value" id="pred-conf">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="probabilities" id="prob-container">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-col">
+                <img
+                    src="./flower.png"
+                    alt="Iris Flower Reference"
+                    class="reference-img"
+                />
+                <p class="reference-caption">
+                    Reference: Sepal and Petal measurements.
+                </p>
+            </div>
+        </div>
+
+        <script>
+            document
+                .getElementById("predict-form")
+                .addEventListener("submit", async (e) => {
+                    e.preventDefault();
+
+                    const btn = document.getElementById("submit-btn");
+                    const originalText = btn.textContent;
+                    btn.textContent = "Processing...";
+                    btn.style.opacity = "0.8";
+
+                    const payload = {
+                        sepal_length: parseFloat(
+                            document.getElementById("sepal_length").value,
+                        ),
+                        sepal_width: parseFloat(
+                            document.getElementById("sepal_width").value,
+                        ),
+                        petal_length: parseFloat(
+                            document.getElementById("petal_length").value,
+                        ),
+                        petal_width: parseFloat(
+                            document.getElementById("petal_width").value,
+                        ),
+                    };
+
+                    try {
+                        const response = await fetch("/predict", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        });
+
+                        if (!response.ok)
+                            throw new Error(
+                                "Prediction failed. Make sure the model is loaded.",
+                            );
+
+                        const data = await response.json();
+
+                        document.getElementById(
+                            "result-container",
+                        ).style.display = "block";
+                        document.getElementById("pred-flower").textContent =
+                            data.flower;
+                        document.getElementById("pred-conf").textContent =
+                            (data.confidence * 100).toFixed(1) + "%";
+
+                        const probContainer =
+                            document.getElementById("prob-container");
+                        probContainer.innerHTML = "";
+
+                        const sortedProbs = Object.entries(
+                            data.probabilities,
+                        ).sort((a, b) => b[1] - a[1]);
+
+                        sortedProbs.forEach(([name, prob]) => {
+                            const pct = (prob * 100).toFixed(1);
+                            probContainer.innerHTML += `
+                        <div class="prob-row">
+                            <div class="prob-label">${name}</div>
+                            <div class="prob-bar-container">
+                                <div class="prob-bar" style="width: ${pct}%"></div>
+                            </div>
+                            <div class="prob-value">${pct}%</div>
+                        </div>
+                    `;
+                        });
+                    } catch (error) {
+                        alert(
+                            error.message ||
+                                "Error connecting to the prediction API.",
+                        );
+                        console.error(error);
+                    } finally {
+                        btn.textContent = originalText;
+                        btn.style.opacity = "1";
+                    }
+                });
+        </script>
+    </body>
+</html>
