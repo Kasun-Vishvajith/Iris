@@ -1,10 +1,8 @@
-# 🌸 Iris Flower Classifier — Dockerized
+# 🌸 Iris Flower Classifier
 
-A fully Dockerized Machine Learning web application for classifying Iris flowers (*Setosa*, *Versicolor*, or *Virginica*) using sepal and petal measurements.
+A Machine Learning web application that classifies Iris flowers (*Setosa*, *Versicolor*, or *Virginica*) using sepal and petal measurements.
 
-The project uses a **Random Forest** classifier implemented with `scikit-learn`, exposed through a **FastAPI** REST API, and includes a clean browser-based user interface.
-
-To ensure reproducibility and simplify deployment, the entire application environment has been containerized using **Docker** and orchestrated with **Docker Compose**.
+The project uses a **Random Forest Classifier** implemented with `scikit-learn`, exposed through a **FastAPI** REST API, and includes a browser-based user interface.
 
 ---
 
@@ -12,76 +10,122 @@ To ensure reproducibility and simplify deployment, the entire application enviro
 
 ```text
 iris-classifier/
-├── Dockerfile
-├── docker-compose.yml
 ├── requirements.txt
 ├── model/
 │   └── train.py          # Trains and saves the model
 └── app/
     ├── main.py           # FastAPI application
     └── index.html        # Frontend web interface
-````
+```
 
 ---
 
 # ⚙️ System Requirements
 
-Before running the project, ensure the following software is installed:
+Please ensure the following software is installed:
 
-* Docker Desktop
+- Python 3.10 or newer
+- pip (Python package manager)
 
-Download Docker Desktop from:
+Verify installation:
 
-* [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
-
-After installation, make sure Docker Desktop is actively running before executing any commands.
+```bash
+python --version
+pip --version
+```
 
 ---
 
-# 🚀 Running the Application
+# 📥 Installation
 
-## Option A — Docker Compose (Recommended)
+## Step 1: Extract the Project
 
-Open a terminal inside the project directory and execute:
-
-```bash
-docker compose up --build
-```
-
-### First-Time Build Note
-
-During the initial execution, Docker will:
-
-* Build the container image
-* Install all Python dependencies
-* Train the Random Forest model
-* Start the FastAPI server
-
-This process may take several minutes depending on internet speed and system performance.
-
-Subsequent executions will be significantly faster.
+Download and extract the project files to a convenient location.
 
 ---
 
-## Option B — Plain Docker
+## Step 2: Open a Terminal
 
-### Build the Docker Image
+Navigate to the project folder:
 
 ```bash
-docker build -t iris-classifier .
+cd iris-classifier
 ```
 
-### Run the Container
+---
+
+## Step 3: Create a Virtual Environment (Recommended)
+
+### Windows
 
 ```bash
-docker run -p 8000:8000 iris-classifier
+python -m venv venv
+venv\Scripts\activate
+```
+
+### macOS/Linux
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+---
+
+## Step 4: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+This will install:
+
+- FastAPI
+- Uvicorn
+- Scikit-learn
+- NumPy
+- Joblib
+- Other required libraries
+
+---
+
+# 🤖 Train the Model
+
+Before starting the application, train the Random Forest model:
+
+```bash
+python model/train.py
+```
+
+The script will:
+
+- Load the Iris dataset
+- Train the classifier
+- Evaluate performance
+- Save the trained model
+
+---
+
+# 🚀 Run the Application
+
+Start the FastAPI server:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+You should see output similar to:
+
+```text
+Application startup complete.
+Uvicorn running on http://127.0.0.1:8000
 ```
 
 ---
 
 # 🌐 Accessing the Application
 
-Once the container is running, open your browser and navigate to:
+Once the server is running, open:
 
 ## Web Interface
 
@@ -89,13 +133,13 @@ Once the container is running, open your browser and navigate to:
 http://localhost:8000
 ```
 
-## Interactive API Documentation
+## API Documentation
 
 ```text
 http://localhost:8000/docs
 ```
 
-The `/docs` endpoint provides automatically generated OpenAPI documentation where API requests can be tested directly from the browser.
+The API documentation allows endpoints to be tested directly from the browser.
 
 ---
 
@@ -103,9 +147,9 @@ The `/docs` endpoint provides automatically generated OpenAPI documentation wher
 
 ## POST `/predict`
 
-Predicts the Iris flower species from input measurements.
+Predicts the Iris flower species.
 
-### Request Body
+### Request
 
 ```json
 {
@@ -116,7 +160,7 @@ Predicts the Iris flower species from input measurements.
 }
 ```
 
-### Example Response
+### Response
 
 ```json
 {
@@ -135,10 +179,6 @@ Predicts the Iris flower species from input measurements.
 
 ## GET `/health`
 
-Checks server and model status.
-
-### Example Response
-
 ```json
 {
   "status": "ok",
@@ -150,101 +190,76 @@ Checks server and model status.
 
 # 🤖 Model Details
 
-| Property         | Value                         |
-| ---------------- | ----------------------------- |
-| Algorithm        | Random Forest Classifier      |
-| Number of Trees  | 100                           |
-| Dataset          | sklearn Iris Dataset          |
-| Dataset Size     | 150 Samples                   |
-| Train/Test Split | 80% / 20%                     |
-| Accuracy         | ~96–100%                      |
-| Target Classes   | setosa, versicolor, virginica |
+| Property | Value |
+|-----------|--------|
+| Algorithm | Random Forest Classifier |
+| Number of Trees | 100 |
+| Dataset | Iris Dataset |
+| Dataset Size | 150 Samples |
+| Train/Test Split | 80% / 20% |
+| Accuracy | ~96–100% |
+| Classes | Setosa, Versicolor, Virginica |
 
 ---
 
-# 🧪 cURL Example
+# 🧪 Example Request Using cURL
 
 ```bash
 curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"sepal_length":6.3,"sepal_width":3.3,"petal_length":6.0,"petal_width":2.5}'
+-H "Content-Type: application/json" \
+-d "{\"sepal_length\":6.3,\"sepal_width\":3.3,\"petal_length\":6.0,\"petal_width\":2.5}"
 ```
 
 ---
 
 # 🛑 Stopping the Application
 
-To stop the running container:
+Press:
 
 ```bash
 Ctrl + C
 ```
 
-If using Docker Compose, containers can also be stopped with:
-
-```bash
-docker compose down
-```
-
----
-
-# 📦 Why Dockerization Was Used
-
-Dockerization was adopted to:
-
-* Eliminate dependency conflicts
-* Avoid manual Python environment setup
-* Ensure platform-independent execution
-* Improve reproducibility across systems
-* Simplify evaluation and deployment
-
-The Docker container encapsulates:
-
-* Python runtime environment
-* Machine learning dependencies
-* Trained model artifacts
-* FastAPI application server
-* Frontend interface
-
-This guarantees consistent behavior across Windows, macOS, and Linux environments.
+in the terminal running the FastAPI server.
 
 ---
 
 # ⚠️ Troubleshooting
 
-## Docker daemon is not running
+## Module Not Found Error
 
-Ensure Docker Desktop is open and fully initialized before running commands.
+Ensure all dependencies have been installed:
+
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
-## Port 8000 is already in use
+## Model File Missing
 
-Another application may already be using port `8000`.
-
-Either:
-
-* Stop the conflicting application, or
-* Run the container on a different port.
-
-Example:
+Run:
 
 ```bash
-docker run -p 8080:8000 iris-classifier
+python model/train.py
 ```
 
-Then access:
+before starting the application.
+
+---
+
+## Port 8000 Already in Use
+
+Run on a different port:
+
+```bash
+uvicorn app.main:app --reload --port 8080
+```
+
+Then open:
 
 ```text
 http://localhost:8080
 ```
 
 ---
-
-## Browser cannot connect to localhost
-
-The application may still be initializing during the first build. Wait a few moments and refresh the page.
-
----
-
-```
